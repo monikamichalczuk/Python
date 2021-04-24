@@ -1,0 +1,59 @@
+import requests
+from requests import get
+from bs4 import BeautifulSoup
+import sqlite3
+from sys import argv
+
+db = sqlite3.connect('dane.db')
+cursor = db.cursor()
+
+cursor.execute('''CREATE TABLE OTODOM (dzielnica TEXT, powierzchnia TEXT, ilosc_pokoi TEXT, cena TEXT)''')
+quit()
+
+db1 = sqlite3.connect('dane.db')
+
+for i in range(1,117):
+    cursor1 = db1.cursor()
+    strona='https://www.otodom.pl/sprzedaz/mieszkanie/gdansk/?search%5Bfilter_enum_market%5D=primary&search%5Bcity_id%5D=40'+'&page='+str(i)
+    
+    page1 = get(strona)
+    bs4= BeautifulSoup(page1.content, 'html.parser')
+    
+    for oferty in bs4.find_all('div', class_='offer-item-details'):
+        footer = oferty.find('header', class_='offer-item-header')
+        location = footer.find('p', class_='text-nowrap').get_text().strip().split(',')[1]
+        powierzchnia = oferty.find('strong', class_='visible-xs-block').get_text().strip()
+        price = oferty.find('li', class_='offer-item-price').get_text().strip()
+        pokoj = oferty.find('li', class_='offer-item-rooms hidden-xs').get_text().strip()
+    
+        cursor1.execute('INSERT INTO OTODOM VALUES(?, ?, ?, ?)',(location, powierzchnia, pokoj, price))
+        db1.commit()
+        
+db1.close()
+
+db2 = sqlite3.connect('dane.db')
+cursor2 = db2.cursor()
+
+cursor2.execute('''CREATE TABLE GRATKA (dzielnica TEXT, powierzchnia TEXT, ilosc_pokoi TEXT, cena TEXT)''')
+quit()
+
+db3 = sqlite3.connect('dane.db')
+
+for i in range(1,45):
+    cursor3 = db3.cursor()
+    strona='https://gratka.pl/nieruchomosci/mieszkania/gdansk/pierwotny'+'?page='+str(i)
+
+    page1 = get(strona)
+    bs4= BeautifulSoup(page1.content, 'html.parser')
+    
+    for oferty in bs4.find_all('article', class_='teaserUnified'):
+        footer = oferty.find('div', class_='teaserUnified__mainInfo')
+        location = footer.find('span', class_='teaserUnified__location').get_text().strip().split(',')[1].strip()
+        powierzchnia = oferty.find('ul', class_='teaserUnified__params').get_text().strip().split('\n')[0]
+        price = oferty.find('p', class_='teaserUnified__price').get_text().split('\n')[1].strip()
+        pokoj = oferty.find('ul', class_='teaserUnified__params').get_text().strip().split('\n')[1]
+        
+        cursor3.execute('INSERT INTO GRATKA VALUES(?, ?, ?, ?)',(location, powierzchnia, pokoj, price))
+        db3.commit()
+        
+db3.close()
