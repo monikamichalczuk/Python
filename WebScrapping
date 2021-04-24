@@ -80,7 +80,7 @@ for i in range(1,51):
         price = footer.find('p', class_='ogloszeniaList__price').get_text()
         pokoj = oferty.find('div', class_='ogloszeniaList__details').get_text().strip().split('\xa0m2\n ')[-1]
 
-        cursor5.execute('INSERT INTO GRATKA VALUES(?, ?, ?, ?)',(location, powierzchnia, pokoj, price))
+        cursor5.execute('INSERT INTO TROJMIASTO VALUES(?, ?, ?, ?)',(location, powierzchnia, pokoj, price))
         db5.commit()
         
 db5.close()
