@@ -57,3 +57,30 @@ for i in range(1,45):
         db3.commit()
         
 db3.close()
+
+db4 = sqlite3.connect('dane.db')
+cursor4 = db4.cursor()
+
+cursor4.execute('''CREATE TABLE TROJMIASTO (dzielnica TEXT, powierzchnia TEXT, ilosc_pokoi TEXT, cena TEXT)''')
+quit()
+
+db5 = sqlite3.connect('dane.db')
+
+for i in range(1,51):
+    cursor5 = db5.cursor()
+    strona ='https://dom.trojmiasto.pl/nieruchomosci-rynek-pierwotny/f1i,1.html'+'?strona='+str(i)
+
+    page1 = get(strona)
+    bs4= BeautifulSoup(page1.content, 'html.parser')
+    
+    for oferty in bs4.find_all('div', class_='ogloszeniaList__item'):
+        footer = oferty.find('div', class_='ogloszeniaList__wrap')
+        location = footer.find('p', class_='ogloszeniaList__location').get_text().strip().split('\xa0')[-1]
+        powierzchnia = oferty.find('div', class_='ogloszeniaList__details').get_text().strip().split('\xa0m2\n ')[0]
+        price = footer.find('p', class_='ogloszeniaList__price').get_text()
+        pokoj = oferty.find('div', class_='ogloszeniaList__details').get_text().strip().split('\xa0m2\n ')[-1]
+
+        cursor5.execute('INSERT INTO GRATKA VALUES(?, ?, ?, ?)',(location, powierzchnia, pokoj, price))
+        db5.commit()
+        
+db5.close()
